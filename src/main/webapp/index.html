@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.css">
+
+<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+<link rel="stylesheet"
+	href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.css">
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.js"></script>
+
+<script
+	src="//cdn.bootcss.com/jquery-validate/1.15.1/jquery.validate.js"></script>
+
+<script
+	src="//cdn.bootcss.com/jquery-validate/1.15.1/additional-methods.js"></script>
+
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.js"></script>
+
+<script src="//cdn.bootcss.com/bootbox.js/4.4.0/bootbox.js"></script>
+
+<style>
+fieldset.scheduler-border {
+	border: 1px groove #ddd !important;
+	padding: 0 1.4em 1.4em 1.4em !important;
+	margin: 0 0 1.5em 0 !important;
+	-webkit-box-shadow: 0px 0px 0px 0px #000;
+	box-shadow: 0px 0px 0px 0px #000;
+}
+
+legend.scheduler-border {
+	width: inherit; /* Or auto */
+	padding: 0 10px; /* To give a bit of padding on the left and right */
+	border-bottom: none;
+}
+
+label.error {
+	color: red;
+	font-size: 16px;
+	font-weight: normal;
+	line-height: 1.4;
+	margin-top: 0.5em;
+	width: 100%;
+	float: none;
+}
+</style>
+<title>SQL执行工具</title>
+</head>
+<body>
+	<div class="row">
+		<h2 class="text-center">SQL执行</h2>
+	</div>
+	<div class="row">
+		<div>
+			<form class="form-horizontal" role="form" id="reqForm">
+				<fieldset class="scheduler-border">
+					<legend class="scheduler-border">请求设置</legend>
+					<div class="form-group">
+						<label for="requsetUrl" class="col-sm-3 control-label">请求URL地址:</label>
+						<div class="col-sm-9">
+							<input type="url" class="form-control" name="url"
+								placeholder="请输入URL地址">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="parkID" class="col-sm-3 control-label">停车场ID:</label>
+						<div class="col-sm-9">
+							<input type="text" class="form-control" name="parkID"
+								placeholder="请输入停车场ID">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="parkCode" class="col-sm-3 control-label">云平台ParkCode:</label>
+						<div class="col-sm-9">
+							<input type="text" class="form-control" name="parkCode"
+								placeholder="请输入云平台ParkCode">
+						</div>
+					</div>
+
+
+
+					<div class="form-group">
+						<label for="sql" class="col-sm-3 control-label">需要执行的SQL:</label>
+						<div class="col-sm-9">
+							<textarea class="form-control" name="sql" rows="3"></textarea>
+						</div>
+						<div class="col-sm-2 col-md-offset-5">
+							<button type="submit" id="submit" class="btn btn-primary">提交</button>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+
+		</div>
+	</div>
+	<div id="result">
+		<fieldset class="scheduler-border">
+			<legend class="scheduler-border">请求结果</legend>
+			<div id="reqResult" class="table-responsive"></div>
+		</fieldset>
+	</div>
+	<script type="text/javascript">
+	$(document).ready(function() {
+
+	    $("#submit").click(function(e) {
+	        $("#reqForm").validate({
+	            rules: {
+	                requsetUrl: "required",
+	                parkCode: "required",
+	                parkID: "required",
+	                sql: "required"
+	            },
+	            messages: {
+	                requsetUrl: "请输入请求URL地址",
+	                parkCode: "请输入车场的ParkCode",
+	                parkID: "请输入车场ID",
+	                sql: "请输入执行SQL"
+	            },
+	            submitHandler: function(form) {
+	                $("#reqResult").html("");
+	                var paras = $(form).serialize();
+	                $.ajax({
+	                    url: 'web/sql/execute',
+	                    data: paras,
+	                    type: 'post',
+	                    dataType: 'json',
+	                    error: function(data) {
+	                        bootbox.alert(data.responseText);
+	                    },
+	                    success: function(data) {
+	                        try {
+	                            if (!isNaN(parseInt(data))) {
+	                                bootbox.alert("更新的数据条数为:" + data);
+	                                return;
+	                            }
+	                            var objs = eval(data);
+	                            if (objs.length == 0) {
+	                                bootbox.alert("查询无返回结果！");
+	                            } else {
+	                                builderTable(objs, $("#reqResult"))
+	                            }
+	                        } catch(e) {
+	                            bootbox.alert(data);
+	                        }
+	                    }
+
+	                });
+	            }
+	        });
+	    });
+	    function builderTable(datas, parent) {
+
+	        var table = $("<table  class=\"table table-bordered\">");
+	        var trHeader = $("<tr></tr>");
+	        trHeader.appendTo(table);
+	        //表头
+	        var cols = new Array();
+	        for (var i in datas[0]) {
+	            cols.push(i);
+	            var td = $("<td>" + i + "</td>");
+	            td.appendTo(trHeader);
+	        }
+	        for (var rowId in datas) {
+	            var trRow = $("<tr></tr>");
+	            var rowData = datas[rowId];
+	            trRow.appendTo(table);
+	            for (var k in cols) {
+	                var dataKey = cols[k];
+	                var _onedata = rowData[dataKey];
+	                var td = $("<td>" + JSON.stringify(_onedata) + "</td>");
+	                td.appendTo(trRow);
+	            }
+	        }
+	        parent.append(table);
+	    }
+	});
+	</script>
+</body>
+</html>
