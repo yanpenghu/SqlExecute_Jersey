@@ -20,6 +20,11 @@ public abstract class SQLFilter {
 		CAN_DELETE_TABLE.add("TOSTATPARKOPERATOR");
 		CAN_DELETE_TABLE.add("TOSTATPARKCARFLOW");
 		CAN_DELETE_TABLE.add("TOSTATPARKTEMP");
+		
+		CAN_DELETE_TABLE.add("totemporaryparkingclearing");
+		CAN_DELETE_TABLE.add("toTemporaryParkingDailyClearing");
+		CAN_DELETE_TABLE.add("toFixedParkingClearing");
+		CAN_DELETE_TABLE.add("toFixedGroupClearing");
 	}
 
 	public static List<SqlExecuteBean> filter(String sql) {
