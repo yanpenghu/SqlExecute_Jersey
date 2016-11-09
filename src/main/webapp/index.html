@@ -126,16 +126,16 @@ label.error {
 	                sql: "请输入执行SQL"
 	            },
 	            submitHandler: function(form) {
-	                $("#reqResult").html("");
+			$("#reqResult").html("");
 	                var paras = $(form).serialize();
 	                $.ajax({
-	                    url: 'sql/execute.do',
+	                    url: 'web/sql/execute',
 	                    data: paras,
 	                    type: 'post',
 	                    dataType: 'json',
 	                    error: function(data) {
 	                        bootbox.alert(data.responseText);
-	                    },
+	                    },   
 	                    success: function(data) {
 	                        try {
 	                        	data = JSON.parse(data);
