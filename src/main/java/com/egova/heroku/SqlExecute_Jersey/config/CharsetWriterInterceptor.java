@@ -14,7 +14,7 @@ import javax.ws.rs.ext.WriterInterceptorContext;
  *
  */
 @Provider
-public class CharSetWriterInterceptor implements WriterInterceptor {
+public class CharsetWriterInterceptor implements WriterInterceptor {
 
 	@Override
 	public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
