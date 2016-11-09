@@ -129,7 +129,7 @@ label.error {
 	                $("#reqResult").html("");
 	                var paras = $(form).serialize();
 	                $.ajax({
-	                    url: 'web/sql/execute',
+	                    url: 'sql/execute.do',
 	                    data: paras,
 	                    type: 'post',
 	                    dataType: 'json',
@@ -138,16 +138,23 @@ label.error {
 	                    },
 	                    success: function(data) {
 	                        try {
-	                            if (!isNaN(parseInt(data))) {
-	                                bootbox.alert("更新的数据条数为:" + data);
-	                                return;
-	                            }
-	                            var objs = eval(data);
-	                            if (objs.length == 0) {
-	                                bootbox.alert("查询无返回结果！");
-	                            } else {
-	                                builderTable(objs, $("#reqResult"))
-	                            }
+	                        	data = JSON.parse(data);
+	                        	if (data.success) {
+	                        		if (data.executeType == 1) {
+	                        			var objs = data.response;
+	     	                            if (objs.length == 0) {
+	     	                                bootbox.alert("查询无返回结果！");
+	     	                            } else {
+	     	                                builderTable(objs, $("#reqResult"))
+	     	                            }
+		                            }
+		                            if (data.executeType == 2) {
+		                                bootbox.alert("更新的数据条数为:" + data.response);
+		                                return;
+		                            }
+	                        	}else {
+	                        		bootbox.alert(data.response);
+	                        	}
 	                        } catch(e) {
 	                            bootbox.alert(data);
 	                        }
